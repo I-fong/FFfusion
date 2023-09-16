@@ -1,0 +1,12 @@
+h1 {
+    text-align: center;
+    margin-top: 150px;
+    font-size: 70px;
+    color: #264a8e;
+    font-family: "Poppins";
+    font-weight: 700;
+}
+
+* {
+    font-family: "Pretendard";
+}
