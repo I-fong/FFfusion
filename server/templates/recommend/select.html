@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-3">
+    <form method="post" action="{% url 'recommend:select' %}">
+        {% csrf_token %}
+        {% include "form_errors.html" %}
+        <div class="mx-auto row mt-3">
+            {% for image_path in image_paths %}
+            <div class="col-md-2 mb-3">
+                <input type="radio" name="selected_images" id="image{{ forloop.counter }}" value="{{ image_path }}">
+                <label for="image{{ forloop.counter }}" class="form-label">이미지 {{ forloop.counter }}</label>
+                <img src="{{ image_path }}" alt="Image {{ forloop.counter }}" class="img-thumbnail">
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">이미지 선택하기</button>
+    </form>
+</div>
+{% endblock %}
+
