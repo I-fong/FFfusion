@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
-from .ml_model import EmbeddingModel
+from .utils import EmbeddingModel
 
 
 class RecommendConfig(AppConfig):

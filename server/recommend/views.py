@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 
 from .forms import SearchForm
 from .apps import RecommendConfig
+from .utils import add_img_path
 
 
 class ImageSearch(APIView):
@@ -15,18 +16,7 @@ class ImageSearch(APIView):
         if form.is_valid():
             query = form.cleaned_data.get('sentence')
             labels = RecommendConfig.model.inference(query)
-
-            image_paths = [
-                "https://ifong-image-data.s3.ap-northeast-2.amazonaws.com/0.png",
-                "https://ifong-image-data.s3.ap-northeast-2.amazonaws.com/1.png",
-                "https://ifong-image-data.s3.ap-northeast-2.amazonaws.com/2.png",
-                "https://ifong-image-data.s3.ap-northeast-2.amazonaws.com/3.png",
-                "https://ifong-image-data.s3.ap-northeast-2.amazonaws.com/4.png"
-            ]
-
-            context = {
-                'image_paths': image_paths,
-            }
+            context = add_img_path(labels)
         else:
             return render(request, 'recommend/search.html', {'form': form})
         return render(request, 'recommend/select.html', context)
