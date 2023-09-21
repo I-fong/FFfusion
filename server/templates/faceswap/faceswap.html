@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="POST" action="/faceswap/swap/{{img_model.id}}">
+  {% csrf_token %}
+  <div>
+    <div id="target_image_container" data-mydata="{{ target_bbox_json|safe }}"  style="position: relative;">
+      {% if img_model.target_image %}
+      <img class="bbox_image" id="target_image" src="{{ img_model.target_image.url }}">
+    </div>
+    <div>{{target_bbox_json}}</div>
+    {% endif %}
+  </div>
+  <div>
+    <div id="source_image_container" data-mydata="{{ source_bbox_json|safe }}" style="position: relative;">
+      {% if img_model.source_image %}
+      <img class="bbox_image" id="source_image" src="{{ img_model.source_image.url }}">
+    </div>
+    <div>{{source_bbox_json}}</div>
+    {% endif %}
+  </div>
+  <button type="submit"> 스와핑하기 </button>
+  {% if swapped_img_url %}
+  <a>결과 확인👇🏻</a>
+  <img class="bbox_image" src="{{ swapped_img_url }}">
+  {% endif %}
+</form>
+<style>
+  .bbox_image {
+    max-height: 500px;  /* 이미지의 최대 높이를 100%로 설정 */
+    max-width: 500px; /* 이미지의 최대 너비를 100%로 설정 */
+    width: auto; /* 너비를 자동으로 조정하여 비율 유지 */
+    height: auto; /* 높이를 자동으로 조정하여 비율 유지 */
+    object-fit: contain; /* 이미지가 완전히 박스 내에 맞게 조정됨 */
+  }
+</style>
+<!-- <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // HTML 요소 가져오기
+    const targetImageContainer = document.getElementById('target_image_container');
+    const sourceImageContainer = document.getElementById('source_image_container');
+    
+    // data-mydata 속성에서 데이터 가져오기
+    const targetBboxList = JSON.parse(targetImageContainer.getAttribute('data-mydata'));
+    const sourceBboxList = JSON.parse(sourceImageContainer.getAttribute('data-mydata'));
+    
+    function drawBoundingBoxes(container, bboxList, containerType) {
+      for (let i = 0; i < bboxList.length; i++) {
+          const bbox = bboxList[i];
+
+          // Create a container div for the checkbox and image
+          const contCheckbox = document.createElement("div");
+          contCheckbox.className = "cont-checkbox";
+
+          // Create the checkbox input element
+          const checkboxInput = document.createElement("input");
+          if (containerType == 'target'){
+            checkboxInput.type = "checkbox";
+            checkboxInput.id = `${containerType}-${i}`;
+            checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
+            checkboxInput.value = i; // value 속성 설정
+            contCheckbox.className = "cont-checkbox";
+          } else {
+            checkboxInput.type = "radio";
+            checkboxInput.id = `${containerType}-${i}`;
+            checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
+            checkboxInput.value = i; // value 속성 설정
+            contCheckbox.className = "cont-checkbox";
+          }         
+                   
+
+          // Create the label element for checkbox
+          const label = document.createElement("label");
+          label.htmlFor = `${containerType}-${i}`;
+
+          // Create the span for checkbox cover
+          const coverCheckbox = document.createElement("span");
+          coverCheckbox.className = "cover-checkbox";
+
+          // Create the SVG element for checkbox checkmark
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("viewBox", "0 0 12 10");
+          // const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          // polyline.setAttribute("points", "1.5 6 4.5 9 10.5 1");
+          // svg.appendChild(polyline);
+
+          // Create the div for info text
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "info";
+          infoDiv.textContent = "Object " + i; // Replace with the appropriate label
+
+          // Set the position and size of the container div
+          contCheckbox.style.position = "absolute";
+          contCheckbox.style.left = bbox[0] + "px";
+          contCheckbox.style.top = bbox[1] + "px";
+          contCheckbox.style.width = (bbox[2] - bbox[0]) + "px";
+          contCheckbox.style.height = (bbox[3] - bbox[1]) + "px";
+          contCheckbox.style.border = "2px solid blue";
+
+          // Append all elements to the container
+          label.appendChild(contCheckbox);
+          contCheckbox.appendChild(checkboxInput);
+
+          // Add the container div to the specified container
+          container.appendChild(label);
+
+          // // 클릭 이벤트 처리 (각각의 사각형에 대해 클릭 이벤트 핸들러 생성)
+          // contCheckbox.addEventListener("click", createClickHandler(i));
+      }
+    }
+
+    // // 클릭 이벤트 핸들러 생성 함수
+    // function createClickHandler(idx) {
+    //     return function () {
+    //         // 클릭된 사각형의 좌표 출력
+    //         console.log("Clicked bbox:", idx);
+    //     };
+    // }
+
+    // target와 source에 대해 BBox 그리기
+    drawBoundingBoxes(targetImageContainer, targetBboxList, 'target');
+    drawBoundingBoxes(sourceImageContainer, sourceBboxList, 'source');
+  })
+</script> -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // HTML 요소 가져오기
+    const targetImageContainer = document.getElementById('target_image_container');
+    const sourceImageContainer = document.getElementById('source_image_container');
+    
+    // data-mydata 속성에서 데이터 가져오기
+    const targetBboxList = JSON.parse(targetImageContainer.getAttribute('data-mydata'));
+    const sourceBboxList = JSON.parse(sourceImageContainer.getAttribute('data-mydata'));
+    console.log(targetBboxList)
+    console.log(sourceBboxList)
+    
+    function drawBoundingBoxes(container, bboxList, containerType) {
+      // 이미지 요소 가져오기
+      const image = container.querySelector('img');
+          
+      // 이미지의 원래 크기 가져오기
+      const originalImageWidth = image.naturalWidth;
+      const originalImageHeight = image.naturalHeight;
+      
+      // 이미지의 현재 크기 가져오기
+      const currentImageWidth = image.width;
+      const currentImageHeight = image.height;
+      
+      // 크기 비율 계산
+      const widthRatio = currentImageWidth / originalImageWidth;
+      const heightRatio = currentImageHeight / originalImageHeight;
+
+      for (let i = 0; i < bboxList.length; i++) {
+          
+          const bbox = bboxList[i];
+          console.log(bboxList[i])
+
+          // Create a container div for the checkbox and image
+          const contCheckbox = document.createElement("div");
+          contCheckbox.className = "cont-checkbox";
+
+          // Create the checkbox input element
+          const checkboxInput = document.createElement("input");
+          if (containerType == 'target'){
+            checkboxInput.type = "checkbox";
+            checkboxInput.id = `${containerType}-${i}`;
+            checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
+            checkboxInput.value = i; // value 속성 설정
+            contCheckbox.className = "cont-checkbox";
+          } else {
+            checkboxInput.type = "radio";
+            checkboxInput.id = `${containerType}-${i}`;
+            checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
+            checkboxInput.value = i; // value 속성 설정
+            contCheckbox.className = "cont-checkbox";
+          }         
+                   
+          // Create the label element for checkbox
+          const label = document.createElement("label");
+          label.htmlFor = `${containerType}-${i}`;
+
+          // Create the div for info text
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "info";
+          infoDiv.textContent = "Object " + i; // Replace with the appropriate label
+
+          // bbox의 좌표를 이미지 크기에 맞게 조정
+          const adjustedX = bbox[0] * widthRatio;
+          const adjustedY = bbox[1] * heightRatio;
+          const adjustedWidth = (bbox[2] - bbox[0]) * widthRatio;
+          const adjustedHeight = (bbox[3] - bbox[1]) * heightRatio;
+
+          // Set the position and size of the container div
+          contCheckbox.style.position = "absolute";
+          contCheckbox.style.left = adjustedX + "px";
+          contCheckbox.style.top = adjustedY + "px";
+          contCheckbox.style.width = adjustedWidth + "px";
+          contCheckbox.style.height = adjustedHeight + "px";
+          contCheckbox.style.border = "2px solid blue";
+
+          // Append all elements to the container
+          label.appendChild(contCheckbox);
+          contCheckbox.appendChild(checkboxInput);
+
+          // Add the container div to the specified container
+          container.appendChild(label);
+
+          // // 클릭 이벤트 처리 (각각의 사각형에 대해 클릭 이벤트 핸들러 생성)
+          // contCheckbox.addEventListener("click", createClickHandler(i));
+      }
+    }
+
+    // target와 source에 대해 BBox 그리기
+    drawBoundingBoxes(targetImageContainer, targetBboxList, 'target');
+    drawBoundingBoxes(sourceImageContainer, sourceBboxList, 'source');
+  })
+</script>
+{% endblock %}
