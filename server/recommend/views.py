@@ -27,4 +27,10 @@ class ImagePick(APIView):
         return render(request, 'recommend/select.html')
 
     def post(self, request):
-        pass
+        image_path = request.POST.get('selected_image')
+
+        context = {
+            'image_path': image_path,
+        }
+
+        return render(request, 'faceswap/img_upload.html', context)

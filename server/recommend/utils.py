@@ -10,7 +10,7 @@ class EmbeddingModel:
         self.corpus = load_text_data()  # captioning data
         self.corpus_embeddings = [self.embedder.encode(self.corpus[idx], convert_to_tensor=True) for idx in self.corpus]
         self.corpus_index = [idx for idx in self.corpus]
-        self.top_k = 5
+        self.top_k = 4
 
     def inference(self, query) -> list:
         query_embedding = self.embedder.encode(query, convert_to_tensor=True)
