@@ -1,18 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <div>
-  <h1>이미지 스와핑 페이지</h1>
-  <form method="POST" enctype="multipart/form-data">
-    <div>
-      {% csrf_token %}
-      <label for="target_image">Target Image:</label>
-      <input type="file" name="target_image" accept="image/*"><br>
-    </div>
-    <div>
-      <label for="source_image">Source Image:</label>
-      <input type="file" name="source_image" accept="image/*"><br>
-    </div>
-    <button type="submit">이미지 업로드</button>
-  </form>
+    <h1>이미지 스와핑 페이지</h1>
+    <form method="POST" action="{% url 'faceswap:upload_img' %}" enctype="multipart/form-data">
+        <div>
+            {% csrf_token %}
+            <input type="hidden" name="target_image" value="{{ image_path }}">
+            <label for="source_image">Source Image:</label>
+            <input type="file" name="source_image" accept="image/*"><br>
+        </div>
+        <button type="submit">이미지 업로드</button>
+    </form>
 </div>
 {% endblock %}
