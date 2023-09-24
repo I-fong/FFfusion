@@ -131,12 +131,14 @@
             checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
             checkboxInput.value = i; // value 속성 설정
             contCheckbox.className = "cont-checkbox";
+            checkboxInput.required = true; // required 속성 추가
           } else {
             checkboxInput.type = "radio";
             checkboxInput.id = `${containerType}-${i}`;
             checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
             checkboxInput.value = i; // value 속성 설정
             contCheckbox.className = "cont-checkbox";
+            checkboxInput.required = true; // required 속성 추가
           }         
                    
           // Create the label element for checkbox

@@ -14,7 +14,7 @@
         <input class="file" id="chooseFile" type="file" multiple onchange="dropFile.handleFiles(this.files)"> -->
         <input type="hidden" name="target_image" value="{{ image_path }}">
         <label class="file-label" for="source_image">Choose File for Source Image</label>
-        <input class="file" id="source_image" type="file" name="source_image" accept="image/*" onchange="dropFile.handleFiles(this.files)">
+        <input class="file" id="source_image" type="file" name="source_image" accept="image/*" onchange="dropFile.handleFiles(this.files)" required>
       </div>
       <div id="files" class="files">
       </div>
