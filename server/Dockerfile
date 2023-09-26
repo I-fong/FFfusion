@@ -12,6 +12,7 @@ ADD . /srv/docker-server
 WORKDIR /srv/docker-server
  
 RUN pip install --upgrade pip
+RUN pip install --no-cache-dir torch==1.13.1
 RUN pip install -r requirements.txt
 
 #EXPOSE 8000
