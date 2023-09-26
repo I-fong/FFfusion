@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="POST" action="/faceswap/swap/{{img_model.id}}">
+  {% csrf_token %}
+  {% if not swapped_img_url %}
+  <div class="container">
+    <h1 class="title">얼굴 인식 결과</h1>
+    <h3 style="padding: 1rem;"> * 스와핑하고 싶은 얼굴을 선택해주세요</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="image-container card">
+          <h3 class="image-title" style="font-size: 20px; font-family: Poppins";>Target Image</h3>
+          <div style="display: flex; justify-content: center;">
+            <div id="target_image_container" data-mydata="{{ target_bbox_json|safe }}"  style="position: relative; text-align: center;">
+              {% if img_model.target_image %}
+              <img class="bbox_image" id="target_image" src="{{ img_model.target_image.url }}">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="image-container card">
+          <h3 class="image-title" style="font-size: 20px; font-family: Poppins;">Source Image</h3>
+          <div style="display: flex; justify-content: center;">
+            <div id="source_image_container" data-mydata="{{ source_bbox_json|safe }}" style="position: relative; text-align: center;">
+              {% if img_model.source_image %}
+              <!-- <img class="img"src="https://ifong-image-data.s3.ap-northeast-2.amazonaws.com/376.png" alt="이미지 2" class="img-fluid"> -->
+              <img class="bbox_image" id="source_image" src="{{ img_model.source_image.url }}" >
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr style="margin: 2rem 0;">
+    <div style="display: flex; justify-content: center; margin: 4vh;">
+      <button type="submit" class="btn btn-primary" style="width: 20rem; font-size: 22px;">스와핑하기</button>
+    </div>
+  </div>
+  {% else %}
+  <div class="container">
+    <h1 class="title">스와핑 결과</h1>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="image-container card">
+          <div class="d-flex align-items-center justify-content-center">
+            <img class="bbox_image" src="{{ swapped_img_url }}">
+            <!-- <img class="bbox_image" src="{{ swapped_img_url }}"> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr style="margin: 2rem 0;">
+    <div style="display: flex; justify-content: space-evenly;">
+      <a href="{% url 'recommend:search' %}" class="btn btn-primary" style="width: 20rem; font-size: 22px;">홈으로 이동</a>
+    </div>
+  </div>
+  {% endif %}
+</form>
+<style>
+  .bbox_image {
+    max-height: 360px;  /* 이미지의 최대 높이를 100%로 설정 */
+    max-width: 500px; /* 이미지의 최대 너비를 100%로 설정 */
+    width: auto; /* 너비를 자동으로 조정하여 비율 유지 */
+    height: auto; /* 높이를 자동으로 조정하여 비율 유지 */
+    object-fit: contain; /* 이미지가 완전히 박스 내에 맞게 조정됨 */
+  }
+  .image-container {
+    border: 1px solid #ccc; /* 테두리 스타일 지정 */
+    padding: 10px; /* 내부 여백 설정 */
+    display: flex;
+  }
+  .image-container h3{
+    border: 1px solid #ccc; /* 테두리 스타일 지정 */
+    padding: 10px; /* 내부 여백 설정 */
+  }
+  .img {
+    max-width: 32vw;
+    max-height: 35vh;
+    width: auto; /* 너비를 자동으로 조정하여 비율 유지 */
+    height: auto; /* 높이를 자동으로 조정하여 비율 유지 */
+    object-fit: contain; /* 이미지가 완전히 박스 내에 맞게 조정됨 */
+    justify-content: center;
+  }
+</style>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // HTML 요소 가져오기
+    const targetImageContainer = document.getElementById('target_image_container');
+    const sourceImageContainer = document.getElementById('source_image_container');
+    
+    // data-mydata 속성에서 데이터 가져오기
+    const targetBboxList = JSON.parse(targetImageContainer.getAttribute('data-mydata'));
+    const sourceBboxList = JSON.parse(sourceImageContainer.getAttribute('data-mydata'));
+    console.log(targetBboxList)
+    console.log(sourceBboxList)
+    
+    function drawBoundingBoxes(container, bboxList, containerType) {
+      // 이미지 요소 가져오기
+      const image = container.querySelector('img');
+          
+      // 이미지의 원래 크기 가져오기
+      const originalImageWidth = image.naturalWidth;
+      const originalImageHeight = image.naturalHeight;
+      
+      // 이미지의 현재 크기 가져오기
+      const currentImageWidth = image.width;
+      const currentImageHeight = image.height;
+      
+      // 크기 비율 계산
+      const widthRatio = currentImageWidth / originalImageWidth;
+      const heightRatio = currentImageHeight / originalImageHeight;
+
+      for (let i = 0; i < bboxList.length; i++) {
+          
+          const bbox = bboxList[i];
+          console.log(bboxList[i])
+
+          // Create a container div for the checkbox and image
+          const contCheckbox = document.createElement("div");
+          contCheckbox.className = "cont-checkbox";
+
+          // Create the checkbox input element
+          const checkboxInput = document.createElement("input");
+          if (containerType == 'target'){
+            checkboxInput.type = "checkbox";
+            checkboxInput.id = `${containerType}-${i}`;
+            checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
+            checkboxInput.value = i; // value 속성 설정
+            contCheckbox.className = "cont-checkbox";
+            checkboxInput.required = true; // required 속성 추가
+          } else {
+            checkboxInput.type = "radio";
+            checkboxInput.id = `${containerType}-${i}`;
+            checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
+            checkboxInput.value = i; // value 속성 설정
+            contCheckbox.className = "cont-checkbox";
+            checkboxInput.required = true; // required 속성 추가
+          }         
+                   
+          // Create the label element for checkbox
+          const label = document.createElement("label");
+          label.htmlFor = `${containerType}-${i}`;
+
+          // Create the div for info text
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "info";
+          infoDiv.textContent = "Object " + i; // Replace with the appropriate label
+
+          // bbox의 좌표를 이미지 크기에 맞게 조정
+          const adjustedX = bbox[0] * widthRatio;
+          const adjustedY = bbox[1] * heightRatio;
+          const adjustedWidth = (bbox[2] - bbox[0]) * widthRatio;
+          const adjustedHeight = (bbox[3] - bbox[1]) * heightRatio;
+
+          // Set the position and size of the container div
+          contCheckbox.style.position = "absolute";
+          contCheckbox.style.left = adjustedX + "px";
+          contCheckbox.style.top = adjustedY + "px";
+          contCheckbox.style.width = adjustedWidth + "px";
+          contCheckbox.style.height = adjustedHeight + "px";
+          contCheckbox.style.border = "2px solid blue";
+
+          // Append all elements to the container
+          label.appendChild(contCheckbox);
+          contCheckbox.appendChild(checkboxInput);
+
+          // Add the container div to the specified container
+          container.appendChild(label);
+
+          // // 클릭 이벤트 처리 (각각의 사각형에 대해 클릭 이벤트 핸들러 생성)
+          // contCheckbox.addEventListener("click", createClickHandler(i));
+      }
+    }
+
+    // target와 source에 대해 BBox 그리기
+    drawBoundingBoxes(targetImageContainer, targetBboxList, 'target');
+    drawBoundingBoxes(sourceImageContainer, sourceBboxList, 'source');
+  })
+</script>
+{% endblock %}
