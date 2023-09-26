@@ -12,6 +12,8 @@ services:
         volumes:
           - ./server:/srv/docker-server
           - ./log:/var/log/nginx
+          - django_media:/srv/docker-server/media
+          - django_static:/srv/docker-server/static 
         depends_on:
           - django
 
@@ -24,3 +26,9 @@ services:
         volumes:
           - ./server:/srv/docker-server
           - ./log:/var/log/uwsgi
+          - django_media:/srv/docker-server/media
+          - django_static:/srv/docker-server/static 
+
+volumes:
+  django_media:
+  django_static:
