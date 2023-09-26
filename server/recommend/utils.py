@@ -6,7 +6,7 @@ import json
 
 class EmbeddingModel:
     def __init__(self):
-        self.embedder = SentenceTransformer("jhgan/ko-sbert-sts")
+        self.embedder = SentenceTransformer("jhgan/ko-sbert-nli")
         self.corpus = load_text_data()  # captioning data
         self.corpus_embeddings = [self.embedder.encode(self.corpus[idx], convert_to_tensor=True) for idx in self.corpus]
         self.corpus_index = [idx for idx in self.corpus]
