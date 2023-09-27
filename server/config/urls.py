@@ -22,7 +22,7 @@ from config import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('recommend/', include('recommend.urls')),
+    path('', include('recommend.urls')),
     path('faceswap/', include('faceswap.urls')),
 ]
 
