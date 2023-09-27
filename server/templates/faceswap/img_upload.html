@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div id="root">
-  <h1 class="title">바꾸고 싶은 이미지 업로드</h1>
+  <h1 class="title">원하는 얼굴 이미지 업로드</h1>
   <form method="POST" action="{% url 'faceswap:upload_img' %}" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="contents">
