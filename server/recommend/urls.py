@@ -7,6 +7,6 @@ app_name = 'recommend'
 
 
 urlpatterns = [
-    path('search/', views.ImageSearch.as_view(), name='search'),
+    path('', views.ImageSearch.as_view(), name='search'),
     path('select/', views.ImagePick.as_view(), name='select'),
 ]
