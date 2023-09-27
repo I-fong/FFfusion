@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>
-    deep daiv.
+    무한짤봇
 </h1>
 <div class="container my-3">
     <form method="post" action="{% url 'recommend:search' %}">
@@ -9,8 +9,8 @@
         {% include "form_errors.html" %}
         <div class="mx-auto w-50 mt-5 input-group mb-3">
           <input type="text" class="form-control" name="sentence" value="{{ form.sentence.value|default_if_none:'' }}"
-                 placeholder="원하는 문장을 입력해주세요"
-                 aria-label="원하는 문장을 입력해주세요"
+                 placeholder="상대방에게 전하고 싶은 문장을 입력해주세요."
+                 aria-label="상대방에게 전하고 싶은 문장을 입력해주세요."
                  aria-describedby="button-addon2">
           <button class="btn btn-outline-secondary" type="submit" id="button-addon2">짤 추천 받기</button>
         </div>
