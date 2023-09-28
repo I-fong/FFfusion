@@ -8,14 +8,27 @@ services:
         image: docker-server/nginx
         restart: always
         ports:
-          - "80:80"
+          - '80:80'
+          - '443:443'
         volumes:
           - ./server:/srv/docker-server
           - ./log:/var/log/nginx
           - django_media:/srv/docker-server/media
-          - django_static:/srv/docker-server/static 
+          - django_static:/srv/docker-server/static
+          - ../certbot/conf:/etc/letsencrypt
+          - ../certbot/www:/var/www/certbot
         depends_on:
           - django
+        command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+    certbot:
+        container_name: certbot
+        image: certbot/certbot
+        volumes:
+          - ../certbot/conf:/etc/letsencrypt
+          - ../certbot/www:/var/www/certbot
+        entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
 
     django:
         container_name: django
@@ -27,7 +40,7 @@ services:
           - ./server:/srv/docker-server
           - ./log:/var/log/uwsgi
           - django_media:/srv/docker-server/media
-          - django_static:/srv/docker-server/static 
+          - django_static:/srv/docker-server/static
 
 volumes:
   django_media:
