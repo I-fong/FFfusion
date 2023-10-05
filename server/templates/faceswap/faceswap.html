@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<form method="POST" action="/faceswap/swap/{{img_model.id}}">
+<form id ="swapform"method="POST" action="/faceswap/swap/{{img_model.id}}">
   {% csrf_token %}
   {% if not swapped_img_url %}
   <div class="container">
@@ -84,10 +84,8 @@
     justify-content: center;
   }
 </style>
-
-
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  window.onload = function () {
     // HTML 요소 가져오기
     const targetImageContainer = document.getElementById('target_image_container');
     const sourceImageContainer = document.getElementById('source_image_container');
@@ -131,7 +129,6 @@
             checkboxInput.name = `${containerType}_checkbox`; // name 속성 설정
             checkboxInput.value = i; // value 속성 설정
             contCheckbox.className = "cont-checkbox";
-            checkboxInput.required = true; // required 속성 추가
           } else {
             checkboxInput.type = "radio";
             checkboxInput.id = `${containerType}-${i}`;
@@ -179,6 +176,23 @@
     // target와 source에 대해 BBox 그리기
     drawBoundingBoxes(targetImageContainer, targetBboxList, 'target');
     drawBoundingBoxes(sourceImageContainer, sourceBboxList, 'source');
-  })
+
+    document.getElementById("swapform").addEventListener("submit", function(event) {
+      var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      var checked = false;
+  
+      checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+          checked = true;
+        }
+      });
+  
+      if (!checked) {
+        alert("체크박스에서 하나 이상의 옵션을 선택하세요.");
+        event.preventDefault(); // 폼 제출을 취소합니다.
+      }
+    });
+
+  }
 </script>
 {% endblock %}
